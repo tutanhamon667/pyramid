@@ -1,0 +1,193 @@
+# 🔺 Pyramid - Telegram Subscription Service
+
+A secure and scalable Telegram bot service for managing subscriptions with BTC payments and affiliate program.
+
+## 📋 Table of Contents
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+- [Development](#development)
+  - [Project Structure](#project-structure)
+  - [Development Commands](#development-commands)
+  - [Code Style](#code-style)
+- [API Documentation](#api-documentation)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
+
+## ✨ Features
+
+- **Telegram Bot Integration**
+  - User registration and management
+  - Subscription handling
+  - Interactive commands
+  - Automated notifications
+
+- **Payment Processing**
+  - Secure BTC transactions
+  - Lightning Network support
+  - Automated payment verification
+  - Transaction history
+
+- **Affiliate Program**
+  - 50/50 profit sharing
+  - Referral tracking
+  - Automated payouts
+  - Performance analytics
+
+- **Admin Features**
+  - User management
+  - Subscription control
+  - Financial reporting
+  - System monitoring
+
+## 🛠 Tech Stack
+
+- **Backend**
+  - Python 3.8+
+  - FastAPI
+  - SQLAlchemy
+  - python-telegram-bot
+  - Poetry (dependency management)
+
+- **Database & Caching**
+  - PostgreSQL
+  - Redis
+
+- **Payment Processing**
+  - Lightning Network
+  - BitPay/Coinbase Commerce
+
+- **Development Tools**
+  - Docker & Docker Compose
+  - Black (code formatting)
+  - Flake8 (linting)
+  - MyPy (type checking)
+  - Pytest (testing)
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Docker and Docker Compose
+- Python 3.8 or higher
+- Poetry
+- Make (optional, for using Makefile commands)
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/pyramid.git
+   cd pyramid
+   ```
+
+2. Copy environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Build and start services:
+   ```bash
+   make build
+   make up
+   ```
+
+### Configuration
+
+1. Edit `.env` file with your settings:
+   - Telegram Bot Token
+   - Database credentials
+   - Payment gateway settings
+   - Security keys
+
+2. Run database migrations:
+   ```bash
+   make migrate
+   ```
+
+## 💻 Development
+
+### Project Structure
+```
+pyramid/
+├── src/
+│   ├── api/          # API endpoints
+│   ├── bot/          # Telegram bot handlers
+│   ├── core/         # Core business logic
+│   ├── db/           # Database models and migrations
+│   └── services/     # External service integrations
+├── tests/            # Test files
+├── docker/           # Docker configurations
+├── nginx/            # Nginx configurations
+└── scripts/          # Utility scripts
+```
+
+### Development Commands
+
+```bash
+# Install dependencies
+make install         # Production dependencies
+make dev-install    # Development dependencies
+
+# Code quality
+make lint           # Run linters
+make test           # Run tests
+
+# Docker operations
+make build          # Build containers
+make up             # Start services
+make down           # Stop services
+make logs           # View logs
+
+# Database
+make migrate        # Run migrations
+```
+
+### Code Style
+
+- Follow PEP 8 guidelines
+- Use type hints
+- Write docstrings for public interfaces
+- Include tests for new features
+
+## 📚 API Documentation
+
+API documentation is available at:
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+### Key Endpoints
+
+- `/api/v1/users`: User management
+- `/api/v1/subscriptions`: Subscription handling
+- `/api/v1/transactions`: Payment processing
+- `/api/v1/stats`: System statistics
+
+## 🌐 Deployment
+
+1. Configure production settings in `.env`
+2. Build production images:
+   ```bash
+   docker-compose -f docker-compose.prod.yml build
+   ```
+
+3. Deploy services:
+   ```bash
+   docker-compose -f docker-compose.prod.yml up -d
+   ```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

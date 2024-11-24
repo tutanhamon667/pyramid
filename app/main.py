@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status
 from .models import User, PaymentVerification, CuratorInfo, Wallet, VerificationResponse
 from .database import db
 import time
@@ -21,6 +21,7 @@ app = FastAPI(
 @app.post(
     "/register",
     response_model=User,
+    status_code=status.HTTP_201_CREATED,
     summary="Register new user",
     description="Register a new user with their Telegram ID and cryptocurrency wallets"
 )
@@ -35,10 +36,10 @@ async def register_user(
     - **wallets**: List of cryptocurrency wallets (USDT TRC20, BTC, LYC)
     """
     if db.get_user(telegram_id):
-        raise HTTPException(status_code=400, detail="User already registered")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already registered")
     
     if len(wallets) == 0:
-        raise HTTPException(status_code=400, detail="At least one wallet is required")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="At least one wallet is required")
     
     user = User(telegram_id=telegram_id, wallets=wallets)
     return db.create_user(user)
@@ -46,6 +47,7 @@ async def register_user(
 @app.post(
     "/add-referral",
     response_model=dict,
+    status_code=status.HTTP_201_CREATED,
     summary="Add referral",
     description="Add a referral relationship between two users"
 )
@@ -61,17 +63,17 @@ async def add_referral(
     """
     referrer = db.get_user(referrer_id)
     if not referrer:
-        raise HTTPException(status_code=404, detail="Referrer not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Referrer not found")
     
     if len(referrer.referrals) >= 3:
-        raise HTTPException(status_code=400, detail="Maximum referrals reached")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Maximum referrals reached")
     
     referral = db.get_user(referral_id)
     if not referral:
-        raise HTTPException(status_code=404, detail="Referral user not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Referral user not found")
     
     if referral.referrer_id:
-        raise HTTPException(status_code=400, detail="User already has a referrer")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already has a referrer")
     
     referrer.referrals.append(referral_id)
     referral.referrer_id = referrer_id
@@ -95,13 +97,9 @@ async def add_referral(
 async def verify_payment(
     verification: PaymentVerification = Body(
         ...,
-        description="Payment verification details",
-        example={
-            "user_id": "user123",
-            "verification_code": "ABC123"
-        }
+        description="Payment verification details"
     )
-) -> VerificationResponse:
+):
     """
     Verify a payment using the provided verification code.
     
@@ -110,14 +108,14 @@ async def verify_payment(
     """
     user = db.get_user(verification.user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     if not user.curator_id:
-        raise HTTPException(status_code=400, detail="No curator assigned")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No curator assigned")
     
     curator = db.get_user(user.curator_id)
     if not curator:
-        raise HTTPException(status_code=404, detail="Curator not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curator not found")
     
     if verification.verification_code not in user.verification_codes:
         user.verification_codes.append(verification.verification_code)
@@ -155,7 +153,7 @@ async def request_curator_change(
     """
     user = db.get_user(user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     current_time = time.time()
     if not user.last_curator_request:
@@ -166,16 +164,35 @@ async def request_curator_change(
     if current_time - user.last_curator_request < 48 * 3600:
         remaining_time = 48 * 3600 - (current_time - user.last_curator_request)
         raise HTTPException(
-            status_code=400, 
+            status_code=status.HTTP_400_BAD_REQUEST, 
             detail=f"Must wait {remaining_time/3600:.1f} more hours"
         )
     
     new_curator_id = db.get_available_curator([user_id, user.curator_id])
     if not new_curator_id:
-        raise HTTPException(status_code=400, detail="No available curators")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No available curators")
     
     user.curator_id = new_curator_id
     user.last_curator_request = None
     db.update_user(user)
     
     return {"message": "Curator changed successfully"}
+
+@app.get(
+    "/user/{telegram_id}",
+    response_model=User,
+    summary="Get user information",
+    description="Get detailed information about a user"
+)
+async def get_user_info(
+    telegram_id: str
+):
+    """
+    Get detailed information about a user.
+    
+    - **telegram_id**: Telegram ID of the user
+    """
+    user = db.get_user(telegram_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return user

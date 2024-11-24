@@ -1,9 +1,16 @@
-fastapi==0.104.1
+typing-extensions~=4.7.1  # Added to resolve conflicts
+
+fastapi~=0.103.0  # Changed to be compatible with aiogram
 uvicorn==0.24.0
-pydantic==2.4.2
+pydantic~=2.3.0  # Changed to be compatible with aiogram
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.6
 sqlalchemy==2.0.23
 psycopg2-binary==2.9.9
 alembic==1.12.1
+
+# Bot dependencies
+aiogram==3.1.1
+python-dotenv==1.0.0
+httpx==0.25.1

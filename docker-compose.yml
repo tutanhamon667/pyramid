@@ -2,14 +2,17 @@ version: '3.8'
 
 services:
   web:
-    build: .
+    build: 
+      context: .
+      target: web
     ports:
-      - "8000:8000"
+      - "8001:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/pyramid
+      - DATABASE_URL=postgresql://contract:uyfuy^6jji@db:5435/pyramid
       - REDIS_URL=redis://redis:6379/0
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - SECRET_KEY=${SECRET_KEY}
+      - PYTHONPATH=/app
     depends_on:
       - db
       - redis
@@ -19,16 +22,37 @@ services:
     networks:
       - pyramid-network
 
+  bot:
+    build:
+      context: .
+      target: bot
+    environment:
+      - DATABASE_URL=postgresql://contract:uyfuy^6jji@db:5435/pyramid
+      - REDIS_URL=redis://redis:6379/0
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - SECRET_KEY=${SECRET_KEY}
+      - PYTHONPATH=/app
+    depends_on:
+      - web
+      - db
+      - redis
+    volumes:
+      - .:/app
+    command: poetry run python -m app.bot.run_bot
+    networks:
+      - pyramid-network
+
   db:
-    image: postgres:13
+    image: postgres:13-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=contract
+      - POSTGRES_PASSWORD=uyfuy^6jji
       - POSTGRES_DB=pyramid
     ports:
-      - "5432:5432"
+      - "5435:5435"
+    command: -p 5435
     networks:
       - pyramid-network
 

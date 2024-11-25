@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 100
-target-version = ['py38']
+target-version = ['py311']
 include = '\.pyi?$'
 extend-exclude = '''
 # A regex preceded with ^/ will apply only to files and directories
@@ -15,7 +15,7 @@ description = "Telegram subscription service with BTC payments"
 authors = ["Your Name <your.email@example.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.11"
 python-telegram-bot = "^20.0"
 fastapi = "^0.100.0"
 uvicorn = "^0.22.0"
@@ -26,6 +26,7 @@ python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-multipart = "^0.0.6"
 aioredis = "^2.0.1"
+python-dotenv = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.0"

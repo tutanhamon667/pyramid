@@ -1,4 +1,5 @@
-FROM python:3.8-slim
+# Base stage for shared dependencies
+FROM python:3.11-bullseye as base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -22,20 +23,24 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 # Set working directory
 WORKDIR /app
 
-# Copy project files
+# Copy dependency files
 COPY pyproject.toml poetry.lock* ./
 
 # Install dependencies
-RUN poetry install --no-root --no-dev
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi
 
-# Copy application code
+# Copy project files
 COPY . .
 
-# Install the project
-RUN poetry install --no-dev
+# Install project in development mode
+RUN poetry install --no-interaction
 
-# Expose port
+# Web service stage
+FROM base as web
 EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
-# Run the application
-CMD ["poetry", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Bot service stage
+FROM base as bot
+CMD ["python", "-m", "app.bot.run_bot"]

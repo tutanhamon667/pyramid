@@ -1,22 +1,33 @@
 import os
 import asyncio
 from dotenv import load_dotenv
-from bot import PyramidBot
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+
+from handlers import start, help_command, register, wallet, referral
 
 # Load environment variables
 load_dotenv()
 
+# Get bot token from environment
+TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+if not TOKEN:
+    raise ValueError("No TELEGRAM_BOT_TOKEN found in environment")
+
 async def main():
-    # Get configuration from environment variables
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
-    api_base_url = os.getenv("API_BASE_URL", "http://localhost:8000")
+    # Create application and pass it your bot's token
+    application = Application.builder().token(TOKEN).build()
 
-    if not token:
-        raise ValueError("TELEGRAM_BOT_TOKEN environment variable is not set")
+    # Add command handlers
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("register", register))
+    application.add_handler(CommandHandler("wallet", wallet))
+    application.add_handler(CommandHandler("referral", referral))
 
-    # Create and run the bot
-    bot = PyramidBot(token=token, api_base_url=api_base_url)
-    await bot.start()
+    # Start the bot
+    print("Starting bot...")
+    await application.run_polling(allowed_updates=Update.ALL_TYPES)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     asyncio.run(main())
